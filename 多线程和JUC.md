@@ -13,3 +13,40 @@ volatile 通过内存屏障（Memory Barrier）禁止重排：
 - 在 volatile 读操作之前插入 `LoadLoad`、`LoadStore` 屏障：后面的读写不能重排到 volatile 读之前。
 > 
 > 经典案例：DCL 双重检查锁单例，不加 volatile 会发生指令重排，拿到半初始化对象。
+
+## 3. sleep 和 wait 的区别
+
+1. 归属：sleep 是 Thread 静态方法；wait 是 Object 方法
+2. 锁：sleep **不释放锁**；wait **释放锁**
+3. 使用位置：sleep 任意地方；wait 必须 synchronized 内
+4. 唤醒：sleep 时间到自动醒；wait 需要 notify/notifyAll 唤醒（或超时）
+5. 中断：两者被 interrupt 都会抛 InterruptedException
+
+## 4. yield () 和 sleep ()
+
+yield：让出 CPU，回到就绪，时间不确定，不会阻塞；
+sleep：进入阻塞状态，固定休眠时间。
+
+## 5. join 底层原理
+
+join 底层调用 wait ()，所以 join 会释放锁；线程执行完成 JVM 自动 notifyAll。
+
+## 6. interrupt 能不能直接停止线程？
+
+不能！只是设置中断标记。
+
+- 阻塞线程 (sleep/wait/join) → 抛异常，清除标记
+- 运行中线程 → 标记置 true，代码需要自己判断 `isInterrupted()` 来退出
+
+### 快速思维导图总结
+
+- start ()：启动线程，调用 run
+- run ()：线程任务
+- join ()：等待别的线程执行完，底层 wait，释放锁
+- sleep ()：休眠，不释放锁
+- interrupt ()：打中断标记
+- currentThread ()：获取当前线程
+- yield ()：让出 CPU
+- setDaemon ()：守护线程
+- wait ()：释放锁等待（Object）
+- notify/notifyAll：唤醒等待线程（Object）
