@@ -50,3 +50,5 @@ join 底层调用 wait ()，所以 join 会释放锁；线程执行完成 JVM �
 - setDaemon ()：守护线程
 - wait ()：释放锁等待（Object）
 - notify/notifyAll：唤醒等待线程（Object）
+
+## 7.守护进程和用户进程的区别
