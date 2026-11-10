@@ -9,8 +9,8 @@
 指令重排：JVM 和 CPU 为提升执行效率，在不改变单线程执行结果前提下，调整代码执行顺序。
 分为：编译器重排、CPU 指令重排。
 volatile 通过内存屏障（Memory Barrier）禁止重排：
-- 在 volatile 写操作之后插入 `StoreStore`、`StoreLoad` 屏障：前面的读写不能重排到 volatile 写之后；volatile 写的数据刷新到主存。
-- 在 volatile 读操作之前插入 `LoadLoad`、`LoadStore` 屏障：后面的读写不能重排到 volatile 读之前。
+- 在 volatile 写操作**之前**插入 `StoreStore` 屏障（防止前面的普通写重排到 volatile 写之后），写操作**之后**插入 `StoreLoad` 屏障（防止 volatile 写与后面的读写重排，并把写的数据刷新到主存）。
+- 在 volatile 读操作**之后**插入 `LoadLoad`、`LoadStore` 屏障（防止后面的读写重排到 volatile 读之前）。
 > 
 > 经典案例：DCL 双重检查锁单例，不加 volatile 会发生指令重排，拿到半初始化对象。
 
@@ -25,11 +25,11 @@ volatile 通过内存屏障（Memory Barrier）禁止重排：
 ## 4. yield () 和 sleep ()
 
 yield：让出 CPU，回到就绪，时间不确定，不会阻塞；
-sleep：进入阻塞状态，固定休眠时间。
+sleep：进入 TIMED_WAITING（计时等待），固定休眠时间。
 
 ## 5. join 底层原理
 
-join 底层调用 wait ()，所以 join 会释放锁；线程执行完成 JVM 自动 notifyAll。
+join 底层是在目标线程对象上调用 wait()（HotSpot 中线程结束时会对该 Thread 对象执行 notifyAll）。注意：它释放的是目标 Thread 对象这个 monitor，并不会释放调用方自己持有的业务锁。
 
 ## 6. interrupt 能不能直接停止线程？
 
